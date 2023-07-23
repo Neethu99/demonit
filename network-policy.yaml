@@ -1,12 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: bhanuteja822-network-policy
-  namespace: nv1
+  name: nithu99-network-policy
+  namespace: nithu
 spec:
   podSelector:
     matchLabels:
-      app: bhanuteja822
+      app: nithu99
   policyTypes:
     - Ingress
     - Egress
@@ -14,9 +14,9 @@ spec:
     - from:
       - podSelector:
           matchLabels:
-            app: bhanuteja822
+            app: nithu99
   egress:
     - to:
       - podSelector:
           matchLabels:
-            app: bhanuteja822
+            app: nithu99
