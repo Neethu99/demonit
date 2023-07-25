@@ -1,54 +1,65 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nithu99-deployment
-  namespace: nv1
+  name: nithu99
+  namespace: nithu
   labels:
-    app: new-docker-app
+    app: nithu99
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: new-docker-app
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
+      app: nithu99
   template:
     metadata:
       labels:
-        app: new-docker-app
+        app: nithu99
     spec:
-      initContainers:
-      - name: init-setup
-        image: busybox:latest
-        command: ['sh', '-c', 'ls; pwd; sleep 10']
-        envFrom:
-        - configMapRef:
-            name: new-docker-app-deployment
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-label-key
+                operator: In
+                values:
+                - node-label-value
       containers:
-      - name: new-docker-app
-        image: hello12345.azurecr.io/nithu99:latest  # Use your custom Docker image here
+      - name: nithu99
+        image: nithu99/dotnet-demo-app:v1.0
         ports:
-        - containerPort: 5000
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "300Mi"
+          requests:
+            cpu: "100m"
+            memory: "300Mi"
         livenessProbe:
-          httpGet:
-            path: /_status/healthz
-            port: 5000
-          initialDelaySeconds: 8
-          periodSeconds: 10
+          exec:
+            command:
+            - ls
+          initialDelaySeconds: 5
+          periodSeconds: 5
           failureThreshold: 3
           successThreshold: 1
         readinessProbe:
-          httpGet:
-            path: /readiness
-            port: 5000
-          initialDelaySeconds: 15
-          periodSeconds: 5
+          exec:
+            command:
+            - ls
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
         env:
-        - name: new-docker-app-deployment
+        - name: ENV_VARIABLE_1
           valueFrom:
             configMapKeyRef:
-              key: DB_HOST
-              name: new-docker-app-deployment
+              name: nithu99-configmap
+              key: ENV_VARIABLE_1
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nithu99-secret
+              key: SECRET_KEY
